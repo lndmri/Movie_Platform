@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
 import json
 
@@ -7,7 +7,7 @@ views = Blueprint('views', __name__)
 
 @views.route('/',  methods=['GET','POST'])
 def home():
-    return render_template('base.html')
+    return redirect(url_for('auth.login'))
 
 @views.route('/favorites')
 def favorites():
