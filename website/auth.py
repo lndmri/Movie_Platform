@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2, psycopg2.extras
 import re, logging
 from flask_login import login_required, current_user, login_user, logout_user
-
+from datetime import timedelta
 
 auth = Blueprint('auth',__name__)
 
@@ -32,23 +32,29 @@ def login():
         if account:
             password_rs = account['password1']
             if check_password_hash(password_rs, password1):
-                session['loggedin'] = True
+                session.permanent = True
                 session['email'] = account['email']
+                session['firstname'] = account['firstname']
+                #session['loggedin'] = True
                 flash('Logged in successfully', category='success')
-                return redirect(url_for('views.account'))
+                return redirect(url_for('views.user_home'))
             else:
                 flash('Incorrect email/password', category='error')
         else:
             flash('Incorrect email/password', category='error')
-
-    conn.close()
-    cur.close()
-    return render_template("login.html", isLogin=True)
+        conn.close()
+        cur.close()
+        return render_template("login.html", isLogin=True)
+    else:
+        if "email" in session:
+            return redirect(url_for('views.user_home'))
+        return render_template("login.html", isLogin=True)
 
 
 
 @auth.route('/logout')
 def logout():
+    session.pop("email", None)
     return redirect(url_for('auth.login'))
 
 @auth.route('/sign-up', methods=['GET', 'POST'])
@@ -87,5 +93,8 @@ def sign_up():
             conn.close()
             flash('Account created!', category='success')
             return redirect(url_for('auth.login'))
-
-    return render_template("sign_up.html", isSignUp=True)
+        
+    else:
+        if "email" in session:
+            return redirect(url_for('views.user_home'))
+        return render_template("sign_up.html", isSignUp=True)
