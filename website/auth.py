@@ -49,6 +49,9 @@ def login():
         if "email" in session:
             return redirect(url_for('views.user_home'))
         return render_template("login.html", isLogin=True)
+    
+    return render_template("login.html", isLogin=True)
+
 
 
 
@@ -59,6 +62,7 @@ def logout():
 
 @auth.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
+    regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
     conn = db_conn()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -73,14 +77,22 @@ def sign_up():
 
         if account:
             flash('Email already exists.', category='error')
-        elif len(email) < 4:
-            flash('Email must be greater than 4 characters.', category='error')
+        elif not re.fullmatch(regex, email):
+            flash('Email not valid', category='error')
         elif len(firstName) < 2:
             flash('First name must be greater than 1 character.', category='error')
         elif password1 != password2:
             flash('Passwords don\'t match.', category='error')
-        elif len(password1) < 7:
-            flash('Password must be at least 7 characters.', category='error')
+        elif len(password1) < 8 or len(password1) > 20:
+            flash('Password must contain from 8 to 20 characters.', category='error')
+        elif re.search('[0-9]',password1) is None:
+            flash('Password must contain one number.', category='error')
+        elif re.search('[a-z]',password1) is None: 
+            flash('Password must contain a lower case letter.', category='error') 
+        elif re.search('[A-Z]',password1) is None: 
+            flash('Password must contain an upper case letter.', category='error') 
+        elif re.search('[\+\.\\~`!@#:;"<,>/\$%\^&\*\(\)\{\}\[\]\?=_-]',password1) is None:
+            flash('Password must contain a special character.', category='error')
         else:
             conn = db_conn()
             cur = conn.cursor()
@@ -98,3 +110,5 @@ def sign_up():
         if "email" in session:
             return redirect(url_for('views.user_home'))
         return render_template("sign_up.html", isSignUp=True)
+    
+    return render_template("sign_up.html", isSignUp=True)
