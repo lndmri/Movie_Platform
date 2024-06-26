@@ -3,21 +3,6 @@ import psycopg2, psycopg2.extras
 from datetime import timedelta
 
 
-#create connector to DB 
-DB_HOST = "localhost"
-DB_NAME = "Movies_DB"
-DB_USER = "postgres"
-DB_PASS = "database24"
-
-conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-
-cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-cur.execute('''CREATE TABLE IF NOT EXISTS users(user_ID SERIAL PRIMARY KEY, email VARCHAR (50) UNIQUE, firstname varchar(1024), password1 VARCHAR(1024));''')
-conn.commit()
-cur.close()
-conn.close()
-
 # function to start the application
 def create_app():
     app = Flask(__name__)

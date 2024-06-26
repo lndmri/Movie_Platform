@@ -7,7 +7,7 @@ views = Blueprint('views', __name__)
 
 @views.route('/',  methods=['GET','POST'])
 def home():
-    if "email" in session:
+    if "userid" in session:
         firstname = session['firstname']
     else:
         return redirect(url_for('auth.login'))
@@ -15,7 +15,7 @@ def home():
 
 @views.route('/user_home')
 def user_home():
-    if "email" in session:
+    if "userid" in session:
         firstname = session['firstname']
     else:
         return redirect(url_for('auth.login'))
@@ -23,7 +23,7 @@ def user_home():
 
 @views.route('/favorites')
 def favorites():
-    if "email" in session:
+    if "userid" in session:
         firstname = session['firstname']
     else:
         return redirect(url_for('auth.login'))
@@ -31,7 +31,7 @@ def favorites():
 
 @views.route('/my-movies')
 def my_movies():
-    if "email" in session:
+    if "userid" in session:
         firstname = session['firstname']
     else:
         return redirect(url_for('auth.login'))
@@ -39,7 +39,7 @@ def my_movies():
 
 @views.route('/history')
 def history():
-    if "email" in session:
+    if "userid" in session:
         firstname = session['firstname']
     else:
         return redirect(url_for('auth.login'))
@@ -47,7 +47,7 @@ def history():
 
 @views.route('/account')
 def account():
-    if "email" in session:
+    if "userid" in session:
         firstname = session['firstname']
     else:
         return redirect(url_for('auth.login'))

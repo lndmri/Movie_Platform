@@ -30,12 +30,11 @@ def login():
         account = cur.fetchone()
 
         if account:
-            password_rs = account['password1']
+            password_rs = account['password_hash']
             if check_password_hash(password_rs, password1):
                 session.permanent = True
-                session['email'] = account['email']
+                session['userid'] = account['userid']
                 session['firstname'] = account['firstname']
-                #session['loggedin'] = True
                 flash('Logged in successfully', category='success')
                 return redirect(url_for('views.user_home'))
             else:
@@ -46,7 +45,7 @@ def login():
         cur.close()
         return render_template("login.html", isLogin=True)
     else:
-        if "email" in session:
+        if "userid" in session:
             return redirect(url_for('views.user_home'))
         return render_template("login.html", isLogin=True)
     
@@ -57,7 +56,7 @@ def login():
 
 @auth.route('/logout')
 def logout():
-    session.pop("email", None)
+    session.pop("userid", None)
     return redirect(url_for('auth.login'))
 
 @auth.route('/sign-up', methods=['GET', 'POST'])
@@ -69,6 +68,7 @@ def sign_up():
     if request.method == 'POST':
         email = request.form.get('email')
         firstName = request.form.get('firstName')
+        lastName = request.form.get('lastName')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
         
@@ -81,6 +81,8 @@ def sign_up():
             flash('Email not valid', category='error')
         elif len(firstName) < 2:
             flash('First name must be greater than 1 character.', category='error')
+        elif len(lastName) < 2:
+            flash('Last name must be greater than 1 character.', category='error')
         elif password1 != password2:
             flash('Passwords don\'t match.', category='error')
         elif len(password1) < 8 or len(password1) > 20:
@@ -98,8 +100,8 @@ def sign_up():
             cur = conn.cursor()
             hashed_password = generate_password_hash(
                 password1, method='pbkdf2:sha256')
-            cur.execute('''INSERT INTO users (email, firstname, password1) VALUES (%s, %s, %s)''',
-                        (email, firstName, hashed_password))
+            cur.execute('''INSERT INTO users (email, firstname, lastname, password_hash) VALUES (%s, %s, %s, %s)''',
+                        (email, firstName, lastName, hashed_password))
             conn.commit()
             cur.close()
             conn.close()
@@ -107,7 +109,7 @@ def sign_up():
             return redirect(url_for('auth.login'))
         
     else:
-        if "email" in session:
+        if "userid" in session:
             return redirect(url_for('views.user_home'))
         return render_template("sign_up.html", isSignUp=True)
     
