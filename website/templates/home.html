@@ -1,0 +1,29 @@
+{% extends "base.html"%}
+{% block title%} Home {% endblock %}
+
+{% block content%}
+
+<h1> Hello, {{ firstname }}</h1>
+<br>
+
+<h3>Search Movies and TV shows</h3>
+
+
+<div class="form-inline">
+    <div class="input-group">
+        <input class="form-control" id="search_text" type="search" placeholder="Search movie, tv show or cast member...">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button" id="search_button">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="result"> 
+
+</div>
+
+
+
+{% endblock %}

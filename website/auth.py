@@ -4,18 +4,9 @@ import psycopg2, psycopg2.extras
 import re, logging
 from flask_login import login_required, current_user, login_user, logout_user
 from datetime import timedelta
+from .helpers import db_conn
 
 auth = Blueprint('auth',__name__)
-
-DB_HOST = "localhost"
-DB_NAME = "Movies_DB"
-DB_USER = "postgres"
-DB_PASS = "database24"
-
-#connection to DB
-def db_conn():
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    return conn
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -36,7 +27,7 @@ def login():
                 session['userid'] = account['userid']
                 session['firstname'] = account['firstname']
                 flash('Logged in successfully', category='success')
-                return redirect(url_for('views.user_home'))
+                return redirect(url_for('views.home'))
             else:
                 flash('Incorrect email/password', category='error')
         else:
@@ -46,7 +37,7 @@ def login():
         return render_template("login.html", isLogin=True)
     else:
         if "userid" in session:
-            return redirect(url_for('views.user_home'))
+            return redirect(url_for('views.home'))
         return render_template("login.html", isLogin=True)
     
     return render_template("login.html", isLogin=True)
@@ -110,7 +101,7 @@ def sign_up():
         
     else:
         if "userid" in session:
-            return redirect(url_for('views.user_home'))
+            return redirect(url_for('views.home'))
         return render_template("sign_up.html", isSignUp=True)
     
     return render_template("sign_up.html", isSignUp=True)

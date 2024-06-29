@@ -1,0 +1,16 @@
+<!-- This HTML will be appended to the results div in the Home page -->
+<h3>{{numrows}} results found</h3>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">Title</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in results %}
+        <tr>
+            <td>{{row.title}}</td>
+        </tr>
+    {% endfor %}
+        </tbody>
