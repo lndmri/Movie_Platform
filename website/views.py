@@ -63,23 +63,48 @@ def search():
                 results = cur.fetchall()
                 print(results)
 
+                #  I had forgetten to close the DB connection
+                conn.close()
+                cur.close()
+
     return jsonify({'htmlresponse': render_template('response.html', results=results, numrows=numrows)})
 
-@views.route('/favorites')
+@views.route('/favorites', methods=["GET"])
 def favorites():
     if "userid" in session:
-        firstname = session['firstname']
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute("""SELECT m.* FROM Movies m, Favorites f
+                                WHERE m.movieID = f.movieID
+                                AND userID = %s
+                                ORDER BY f.time""",(session['userid'],))
+        
+        favorites = cur.fetchall()
+        
     else:
         return redirect(url_for('auth.login'))
-    return render_template('favorites.html')
+    
+    conn.close()
+    cur.close()
+    return render_template('favorites.html', favorites=favorites)
 
-@views.route('/my-movies')
+@views.route('/my-movies', methods=["GET"])
 def my_movies():
     if "userid" in session:
-        firstname = session['firstname']
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute("""SELECT m.* FROM Movies m, Owns o
+                                WHERE m.movieID = o.movieID 
+                                AND userID = %s
+                                ORDER BY o.time""",(session['userid'],))
+
+        paid_movies = cur.fetchall()    
+    
     else:
         return redirect(url_for('auth.login'))
-    return render_template('my_movies.html')
+    return render_template('my_movies.html', paid_movies=paid_movies)
 
 @views.route('/history')
 def history():

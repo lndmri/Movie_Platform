@@ -3,6 +3,28 @@
 
 {% block content%}
 
-Favorites
+<h3>My favorites</h3>
+{% if favorites %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Title</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in favorites %}
+            <tr>
+                <td>{{row.title}}</td>
+            </tr>           
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<br>
+<h5>No favorites saved yet :(</h5>
+<button class="btn btn-primary" onclick="window.location.href='/'">Search Movies</button>
+{% endif %}
+
+
 
 {% endblock %}

@@ -3,6 +3,27 @@
 
 {% block content%}
 
-My Movies
+<h3>My Movies</h3>
+
+{% if paid_movies %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Title</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in paid_movies %}
+            <tr>
+                <td>{{row.title}}</td>
+            </tr>           
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<br>
+<h5>No movies purchased yet!<h5>
+<button class="btn btn-primary" onclick="window.location.href='/'">Search Movies</button>
+{% endif %}
 
 {% endblock %}
