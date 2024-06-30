@@ -69,7 +69,7 @@ def favorites():
         conn = db_conn()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        cur.execute("""SELECT m.* FROM Movies m, Favorites f
+        cur.execute("""SELECT m.title FROM Movies m, Favorites f
                                 WHERE m.movieID = f.movieID
                                 AND userID = %s
                                 ORDER BY f.time""", (session['userid'],))
@@ -133,3 +133,21 @@ def details(movieID):
     cur.close()
     conn.close()
     return render_template('details.html', movie=movie)
+
+
+@views.route('/add_to_favorites', methods=['POST'])
+def add_to_favorites():
+    userId = session['userid']
+    movieId = request.form.get('movieid')
+
+    conn = db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute(
+        """INSERT INTO favorites (userid, movieid) VALUES (%s, %s)""", (userId, movieId))
+    conn.commit()
+    message = 'Movie added to favorites!'
+    cur.close()
+    conn.close()
+
+    return jsonify({'message': message})
