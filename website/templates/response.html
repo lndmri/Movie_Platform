@@ -16,14 +16,8 @@
             <td>{{row.score}}</td>
             <td>
             <button class="btn btn-info" onclick="seeDetails({{row.movieid}})">Details</button>
-            <button
-          type="submit"
-          class="btn btn-primary"
-          method="POST"
-          onclick="addToFavorites({{row.movieid}})"
-        >
-          Add to Favorites
-        </button>
+            <button type="submit" class="btn btn-primary" method="POST" onclick="addToFavorites({{row.movieid}})">Add to Favorites</button>
+            <button type="submit" class="btn btn-primary" method="POST"">Buy</button>
             </td>  
         </tr>
                
@@ -49,4 +43,5 @@
       },
     });
   }
+
 </script>

@@ -44,7 +44,7 @@ def login():
 
 
 
-
+@auth.route('/details/logout')
 @auth.route('/logout')
 def logout():
     session.pop("userid", None)

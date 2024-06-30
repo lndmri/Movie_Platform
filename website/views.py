@@ -122,17 +122,30 @@ def account():
 
 @views.route('/details/<int:movieID>', methods=['GET'])
 def details(movieID):
+    if "userid" in session:       
+        # db connection
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    # db connection
-    conn = db_conn()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
+        movie = cur.fetchone()
 
-    cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
-    movie = cur.fetchone()
-    print(movieID)
+        cur.execute("""SELECT directors.name FROM Directors, Directs 
+                    WHERE directors.dirid = directs.dirid
+                    AND movieID = %s""", (movieID,))
+        directors = cur.fetchall()
+
+        cur.execute("""SELECT actors.name FROM Actors, Works 
+                    WHERE actors.actorid = works.actorid
+                    AND movieID = %s""", (movieID,))
+        actors = cur.fetchall()
+
+    else:
+        return redirect(url_for('auth.login'))
+    
     cur.close()
     conn.close()
-    return render_template('details.html', movie=movie)
+    return render_template('details.html', movie=movie, directors=directors, actors=actors)
 
 
 @views.route('/add_to_favorites', methods=['POST'])

@@ -9,5 +9,28 @@
     <p><strong>Released:</strong> {{ movie.released }}</p>
     <p><strong>Rating:</strong> {{ movie.rating }}</p>
     <p><strong>Score:</strong> {{ movie.score }}</p>
+
+    <p><strong>Directors:</strong> 
+        <ul class="csv">
+            {% for dir in directors %}
+            <li>{{dir.name}}</li>
+            {% endfor %} 
+        </ul>
+    </p>
+
+    <p><strong>Actors:</strong> 
+        <ul class="csv">
+            {% for actor in actors %}
+            <li>{{actor.name}}</li>
+            {% endfor %} 
+        </ul> 
+    </p>
+
+    </br>
+    <tr>
+        <button type="submit" class="btn btn-primary" method="POST">Add to Favorites</button>
+        <button type="submit" class="btn btn-primary" method="POST">Buy</button>
+    </tr>
     
 {% endblock %}
+
