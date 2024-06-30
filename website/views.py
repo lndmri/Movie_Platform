@@ -1,13 +1,15 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session
 from flask_login import login_required, current_user
 from .helpers import db_conn
-import psycopg2, psycopg2.extras
+import psycopg2
+import psycopg2.extras
 import json
 
 
 views = Blueprint('views', __name__)
 
-@views.route('/',  methods=['GET','POST'])
+
+@views.route('/',  methods=['GET', 'POST'])
 @views.route('/user_home')
 def home():
     if "userid" in session:
@@ -19,7 +21,9 @@ def home():
     return render_template('home.html', firstname=firstname)
 
 # Route for movie searching (this is a route only as we will be showing the content in the home page)
-@views.route('/search', methods = ["POST", "GET"])
+
+
+@views.route('/search', methods=["POST", "GET"])
 def search():
     # db connection
     conn = db_conn()
@@ -27,7 +31,7 @@ def search():
 
     # LOGIC: the logic followed were is that the /search route is invoked as POST request (done by AJAX) then we
     # do search. In the AJAX request we
-    
+
     if request.method == "POST":
         if 'query' in request.form:
             search_word = request.form['query']
@@ -45,8 +49,8 @@ def search():
                     OR m.movieID IN 
                     (SELECT movieID FROM Directs d, Directors di
                     WHERE d.dirID = di.dirID AND di.name ILIKE %s)
-                    ORDER BY m.score
-                    """, ('%' + search_word + '%','%' + search_word + '%','%' + search_word + '%',))
+                    ORDER BY m.score DESC
+                    """, ('%' + search_word + '%', '%' + search_word + '%', '%' + search_word + '%',))
 
                 numrows = int(cur.rowcount)
                 results = cur.fetchall()
@@ -58,42 +62,45 @@ def search():
 
     return jsonify({'htmlresponse': render_template('response.html', results=results, numrows=numrows)})
 
+
 @views.route('/favorites', methods=["GET"])
 def favorites():
     if "userid" in session:
         conn = db_conn()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        
+
         cur.execute("""SELECT m.* FROM Movies m, Favorites f
                                 WHERE m.movieID = f.movieID
                                 AND userID = %s
-                                ORDER BY f.time""",(session['userid'],))
-        
+                                ORDER BY f.time""", (session['userid'],))
+
         favorites = cur.fetchall()
-        
+
     else:
         return redirect(url_for('auth.login'))
-    
+
     conn.close()
     cur.close()
     return render_template('favorites.html', favorites=favorites)
+
 
 @views.route('/my-movies', methods=["GET"])
 def my_movies():
     if "userid" in session:
         conn = db_conn()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        
+
         cur.execute("""SELECT m.* FROM Movies m, Owns o
                                 WHERE m.movieID = o.movieID 
                                 AND userID = %s
-                                ORDER BY o.time""",(session['userid'],))
+                                ORDER BY o.time""", (session['userid'],))
 
-        paid_movies = cur.fetchall()    
-    
+        paid_movies = cur.fetchall()
+
     else:
         return redirect(url_for('auth.login'))
     return render_template('my_movies.html', paid_movies=paid_movies)
+
 
 @views.route('/history')
 def history():
@@ -102,6 +109,7 @@ def history():
     else:
         return redirect(url_for('auth.login'))
     return render_template('history.html')
+
 
 @views.route('/account')
 def account():
@@ -115,7 +123,7 @@ def account():
 @views.route('/details/<int:movieID>', methods=['GET'])
 def details(movieID):
 
-        # db connection
+    # db connection
     conn = db_conn()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
