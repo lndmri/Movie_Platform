@@ -1,16 +1,31 @@
-<!-- This HTML will be appended to the results div in the Home page -->
 <h3>{{numrows}} results found</h3>
 
 <table class="table table-striped">
     <thead>
     <tr>
       <th scope="col">Title</th>
+      <th scope="col">Rating</th>
+      <th scope="col">Score</th>
     </tr>
     </thead>
     <tbody>
     {% for row in results %}
         <tr>
             <td>{{row.title}}</td>
+            <td>{{row.rating}}</td>
+            <td>{{row.score}}</td>
+            <td>
+            <button class="btn btn-info" onclick="seeDetails({{row.movieid}})">Details</button>
+                <button type="submit" class="btn btn-primary" method="POST">Add to Favorites</button>
+            </td>  
         </tr>
+               
+        
     {% endfor %}
-        </tbody>
+    </tbody>
+
+<script type=text/javascript>
+    function seeDetails(movieID) {
+        window.location.href = "/details/" + movieID;
+    }
+</script>

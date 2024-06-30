@@ -9,14 +9,14 @@ $(document).ready(function() {
         performSearch();
     });
 
-    // case the user pressed enter on the serach text area
+    // case the user pressed enter on the search text area
     $('#search_text').keypress(function(event){
         if (event.which == 13) {
             performSearch();
         }
     });
 
-    // Function to perfrom search
+    // Function to perform search
     
     function performSearch() {
         var search = $('#search_text').val();
@@ -39,4 +39,5 @@ $(document).ready(function() {
             }
         });
     }
+
 });

@@ -18,18 +18,7 @@ def home():
     # We get to this return statement if the user is logged in already
     return render_template('home.html', firstname=firstname)
 
-# Proposed Change 1: Why do we need two functions if they are doing exactly the same
-# My proposed change is to merge them. BY adding decorator @views.route('/user_home') to the first function
-
-# @views.route('/user_home')
-# def user_home():
-#     if "userid" in session:
-#         firstname = session['firstname']
-#     else:
-#         return redirect(url_for('auth.login'))
-#     return render_template('user_home.html', firstname=firstname)
-
-# Route for movie searching (this is a route onlu as we will be showing the content in the home page)
+# Route for movie searching (this is a route only as we will be showing the content in the home page)
 @views.route('/search', methods = ["POST", "GET"])
 def search():
     # db connection
@@ -123,3 +112,16 @@ def account():
     return render_template('account.html')
 
 
+@views.route('/details/<int:movieID>', methods=['GET'])
+def details(movieID):
+
+        # db connection
+    conn = db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
+    movie = cur.fetchone()
+    print(movieID)
+    cur.close()
+    conn.close()
+    return render_template('details.html', movie=movie)
