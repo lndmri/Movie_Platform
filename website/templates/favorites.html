@@ -14,9 +14,10 @@ content%}
     <tr>
       <td>{{row.title}}</td>
       <td>
-        <button class="btn btn-primary" type="submit" method="POST">
-          Remove
-        </button>
+        <form action="/remove_favorite" method="POST" style="display: inline">
+          <input type="hidden" name="favorite_title" value="{{ row.title }}" />
+          <button class="btn btn-primary" type="submit">Remove</button>
+        </form>
       </td>
     </tr>
     {% endfor %}
