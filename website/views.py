@@ -122,7 +122,7 @@ def account():
 
 @views.route('/details/<int:movieID>', methods=['GET'])
 def details(movieID):
-    if "userid" in session:       
+    if "userid" in session:
         # db connection
         conn = db_conn()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -142,7 +142,7 @@ def details(movieID):
 
     else:
         return redirect(url_for('auth.login'))
-    
+
     cur.close()
     conn.close()
     return render_template('details.html', movie=movie, directors=directors, actors=actors)
@@ -164,3 +164,21 @@ def add_to_favorites():
     conn.close()
 
     return jsonify({'message': message})
+
+
+@views.route('/remove_favorite', methods=["POST"])
+def remove_favorite():
+    userId = session['userid']
+    movieId = request.form.get('favorite_title')
+
+    conn = db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute(
+        """DELETE FROM favorites WHERE movieid IN (SElECT movieid FROM movies m WHERE m.title = %s) AND userid = %s""", (movieId, userId,))
+    conn.commit()
+    message = 'Movie removed from favorites!'
+    cur.close()
+    conn.close()
+
+    return redirect(url_for('views.favorites'))
