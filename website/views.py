@@ -68,7 +68,7 @@ def favorites():
         conn = db_conn()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        cur.execute("""SELECT m.title FROM Movies m, Favorites f
+        cur.execute("""SELECT m.* FROM Movies m, Favorites f
                                 WHERE m.movieID = f.movieID
                                 AND userID = %s
                                 ORDER BY f.time""", (session['userid'],))
@@ -83,6 +83,78 @@ def favorites():
     return render_template('favorites.html', favorites=favorites)
 
 
+@views.route('/buy_movie', methods=["POST"])
+def buy_movie():
+
+    if "userid" in session:
+        try:
+            # db connection
+            conn = db_conn()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+            if 'movieID' in request.form and 'title' in request.form and 'price' in request.form:
+                movieID = request.form['movieID']
+                title = request.form['title']
+                price = float(request.form['price'])
+            else:
+                message = "Internal error"
+                cur.close()
+                conn.close()
+                return jsonify({'message': message, 'status':'error'})
+
+            # checking if the user has already bought that movie
+            cur.execute("SELECT * FROM Owns WHERE userID = %s AND movieID = %s", (session['userid'], movieID))
+            if cur.rowcount > 0:
+                message = "You have already purchased this movie"   
+                cur.close()
+                conn.close()
+                return jsonify({'message': message, 'status': 'error'})             
+            else:
+                # if the user has not purchased the movie before 
+                # we check if the user has enough money
+                cur.execute("SELECT cash FROM Users WHERE userID = %s", (session['userid'],))
+                cash_result = cur.fetchone()
+                # checking if we got a resylt from the query
+                if cash_result:
+                    cash = float(cash_result['cash'])
+                    print(cash)
+                else:
+                    message = "Purchase successfully completed. To see your purchased movies go to 'My Movies'"
+                    cur.close()
+                    conn.close()
+                    return jsonify({'message': message, 'status': 'success'})
+ 
+                if cash < price:
+                    message = "Insufficient funds to complete transaction.\n Plase add money to the account"
+                    cur.close()
+                    conn.close()
+                    return jsonify({'message': message, 'status': 'error'})
+                    
+                else:
+                    new_cash =  cash - price
+                    cur.execute("UPDATE Users SET cash = %s WHERE userID = %s", (new_cash, session['userid'],))
+                    cur.execute("INSERT INTO Owns (userID, movieID) VALUES (%s, %s)",(session['userid'], movieID,))
+                    cur.execute("""INSERT INTO Transactions 
+                                (userID, transactionType, movie, amount, balanceBefore, balanceAfter)
+                                VALUES (%s, %s, %s, %s, %s, %s)
+                                """, (session['userid'], "Purchase", title, price, cash, new_cash,))
+                    conn.commit()
+                    message = "Purchase successfully completed.\n To see your purchased movies go to 'My Movies'"
+                    return jsonify({'message': message, 'status': 'success'})
+
+        except Exception as e:
+            conn.rollback()
+            message = str(e)
+            print(message)
+            return jsonify({'message': message, 'status': 'error'})
+        finally:
+            cur.close()
+            conn.close()    
+    else:
+        return redirect(url_for('auth.login'))
+    
+
+   
 @views.route('/my-movies', methods=["GET"])
 def my_movies():
     if "userid" in session:

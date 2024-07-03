@@ -15,33 +15,12 @@
             <td>{{row.rating}}</td>
             <td>{{row.score}}</td>
             <td>
-            <button class="btn btn-info" onclick="seeDetails({{row.movieid}})">Details</button>
-            <button type="submit" class="btn btn-primary" method="POST" onclick="addToFavorites({{row.movieid}})">Add to Favorites</button>
-            <button type="submit" class="btn btn-primary" method="POST"">Buy</button>
+            <button class="btn btn-info" onclick="seeDetails('{{row.movieid}}')">Details</button>
+            <button class="btn btn-primary" onclick="addToFavorites('{{row.movieid}}')">Add to Favorites</button>
+            <button class="btn btn-success" onclick="buyMovie('{{row.movieid}}', '{{row.title}}', '{{row.type}}', '{{row.price}}')">Buy</button>
             </td>  
-        </tr>
-               
-        
+        </tr>        
     {% endfor %}
     </tbody>
-
-<script type=text/javascript>
-    function seeDetails(movieID) {
-        window.location.href = "/details/" + movieID;
-    }
-
-    function addToFavorites(movieid) {
-    $.ajax({
-      url: "add_to_favorites",
-      method: "POST",
-      data: { movieid: movieid },
-      success: function (data) {
-        alert(data.message);
-      },
-      error: function (xhr, status, error) {
-        alert("Error: " + error);
-      },
-    });
-  }
 
 </script>

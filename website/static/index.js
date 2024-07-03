@@ -86,4 +86,50 @@ $(document).ready(function() {
             window.location.href = "/add_cash";
         }
     }
+
+    // function to redirect user to details of movie
+    window.seeDetails = function(movieID) {
+        window.location.href = "/details/" + movieID;
+    }
+
+    // function to add a mvoie to favorites
+    window.addToFavorites = function(movieid) {
+    $.ajax({
+      url: "add_to_favorites",
+      method: "POST",
+      data: { movieid: movieid },
+      success: function (data) {
+        alert(data.message);
+      },
+      error: function (xhr, status, error) {
+        alert("Error: " + error);
+      },
+    });
+  }
+
+
+    // Function to buy movies
+    window.buyMovie = function(movieID, title, type, price) {
+        
+        let userConfirmation = confirm(`Are you sure you want to buy this movie?\n ${type}: ${title}.\n Price: $ ${price}`);
+
+        if (userConfirmation)
+        {
+            $.ajax({
+                url: "/buy_movie",
+                method: "POST",
+                data: {movieID: movieID , title: title, price: price},
+                success: function(data) 
+                {
+                    alert(data.message)
+                },
+                error: function(data)
+                {
+                    alert(data.message)
+                }
+            })
+        }
+        
+    }
+
 });
