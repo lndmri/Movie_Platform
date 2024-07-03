@@ -40,4 +40,50 @@ $(document).ready(function() {
         });
     }
 
+    $('#add_cash').click(function() {
+        let float_amount = parseFloat($('#amount').val());
+        if (float_amount != '' && float_amount > 0) {
+            addCash();
+        }
+        else {
+            window.alert("Please add a positive amount.");
+        }
+    });
+
+    // case the user pressed enter on the search text area
+    $('#amount').keypress(function(event){
+        if (event.which == 13) {
+            let float_amount = parseFloat($('#amount').val());
+            if (float_amount != '' && float_amount > 0) {
+                addCash();
+            }
+            else {
+                window.alert("Please add a positive amount.");
+            }
+        }
+    });
+
+    //add cash function
+    function addCash() {
+        let amount = parseFloat($('#amount').val());
+        let oldbalance = parseFloat($('#current_balance').val());
+        new_balance = amount + oldbalance;
+
+        let text;
+        if (confirm("Please confirm that you want to complete the transaction.") == true) {
+            text = "Transaction completed!";
+            $.ajax({
+                url: "update_cash",
+                method: "POST",
+                data: { new_balance: new_balance },  
+                success: function account() {
+                    window.location.href = "/account";
+                },
+            });
+        } 
+        else {
+            text = "Transaction cancelled!";
+            window.location.href = "/add_cash";
+        }
+    }
 });

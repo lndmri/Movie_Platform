@@ -2,7 +2,25 @@
 {% block title%} Account {% endblock %}
 
 {% block content%}
+</br>
+<h3>My Account</h3>
 
-Account
+<table class="table table-striped">
+</br>
+    <tbody>
+      <tr>
+        <td><strong>Full Name: </strong> {{results.firstname}} {{results.lastname}} </td>
+      </tr>
+      <tr>
+        <td><strong> Email: </strong> {{results.email}} </td>
+      </tr>
+      <tr>
+        <td><strong>Balance: </strong> ${{results.cash}} </td>
+      </tr>
+      <tr>
+      <td><button class="btn btn-primary" onclick="window.location.href='/add_cash'">Add cash</button></td>
+      </tr>
+    </tbody>
+  </table>
 
 {% endblock %}

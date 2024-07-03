@@ -56,9 +56,8 @@ def search():
                 results = cur.fetchall()
                 print(results)
 
-                #  I had forgetten to close the DB connection
-                conn.close()
-                cur.close()
+            conn.close()
+            cur.close()
 
     return jsonify({'htmlresponse': render_template('response.html', results=results, numrows=numrows)})
 
@@ -109,15 +108,6 @@ def history():
     else:
         return redirect(url_for('auth.login'))
     return render_template('history.html')
-
-
-@views.route('/account')
-def account():
-    if "userid" in session:
-        firstname = session['firstname']
-    else:
-        return redirect(url_for('auth.login'))
-    return render_template('account.html')
 
 
 @views.route('/details/<int:movieID>', methods=['GET'])
@@ -182,3 +172,56 @@ def remove_favorite():
     conn.close()
 
     return redirect(url_for('views.favorites'))
+
+
+@views.route('/account', methods=["GET"])
+def account():
+    if "userid" in session:
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        cur.execute("""SELECT * FROM Users
+                        WHERE userID = %s """, (session['userid'],))
+        results = cur.fetchone()
+
+    else:
+        return redirect(url_for('auth.login'))
+
+    conn.close()
+    cur.close()
+    return render_template('account.html', results=results)
+
+@views.route('/add_cash', methods=['GET', 'POST'])
+def add_cash():
+    if "userid" in session:
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute("""SELECT * FROM Users
+                    WHERE userID = %s """, (session['userid'],))
+        
+        user = cur.fetchone()
+
+    else:
+        return redirect(url_for('auth.login'))
+    
+    conn.close()
+    cur.close()
+    return render_template('add_cash.html', user=user )
+
+@views.route('/update_cash', methods=['GET','POST'])
+def update_cash():
+    # db connection
+    conn = db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == "POST":
+        if 'new_balance' in request.form:
+            new_balance = request.form['new_balance']             
+            cur.execute("""UPDATE Users SET cash = %s
+                    WHERE userID = %s """, (new_balance, session['userid']))
+            conn.commit()
+    conn.close()
+    cur.close()
+    return redirect(url_for('views.account'))
+
+
