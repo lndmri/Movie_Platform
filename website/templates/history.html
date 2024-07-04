@@ -3,6 +3,40 @@
 
 {% block content%}
 </br>
-History
+<h3>Transactions</h3>
+{% if transactions %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Transaction Type</th>
+      <th scope="col">Movie</th>
+      <th scope="col">Amount</th>
+      <th scope="col">Final Balance ($)</th>
+      <th scope="col">Transation Time ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in transactions %}
+    <tr>
+      <td>{{row.transactiontype}}</td>
+      {%if row.movie %}
+      <td>{{row.movie}}</td>
+      {%else%}
+      <td></td>
+      {% endif %}
+      <td>{{row.amount}}</td>
+      <td>{{row.balanceafter}}</td>
+      <td>{{row.transaction_time}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<br />
+<h5>No transactions yet.</h5>
+<button class="btn btn-primary" onclick="window.location.href='/'">
+  Search Movies
+</button>
+{% endif %}
 
 {% endblock %}

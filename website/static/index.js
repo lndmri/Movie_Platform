@@ -63,27 +63,26 @@ $(document).ready(function() {
         }
     });
 
-    //add cash function
-    function addCash() {
-        let amount = parseFloat($('#amount').val());
-        let oldbalance = parseFloat($('#current_balance').val());
-        new_balance = amount + oldbalance;
 
-        let text;
-        if (confirm("Please confirm that you want to complete the transaction.") == true) {
-            text = "Transaction completed!";
+    function addCash(){
+        amount = $('#amount').val();
+        
+        let userConfirmation = confirm(`Are you sure you want to add $${amount} to your current balance?`);
+        if (userConfirmation)
+        {
             $.ajax({
-                url: "update_cash",
+                url: "/update_cash",
                 method: "POST",
-                data: { new_balance: new_balance },  
-                success: function account() {
-                    window.location.href = "/account";
+                data: {amount: amount},
+                success: function(data) 
+                {
+                    alert(data.message)
                 },
-            });
-        } 
-        else {
-            text = "Transaction cancelled!";
-            window.location.href = "/add_cash";
+                error: function(data)
+                {
+                    alert(data.message)
+                }
+            })
         }
     }
 
@@ -92,7 +91,7 @@ $(document).ready(function() {
         window.location.href = "/details/" + movieID;
     }
 
-    // function to add a mvoie to favorites
+    // function to add a movie to favorites
     window.addToFavorites = function(movieid) {
     $.ajax({
       url: "add_to_favorites",

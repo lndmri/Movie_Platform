@@ -15,16 +15,18 @@ def home():
     if "userid" in session:
         firstname = session['firstname']
         print()
+
+        # We get to this return statement if the user is logged in already
+        return render_template('home.html', firstname=firstname)
     else:
         return redirect(url_for('auth.login'))
-    # We get to this return statement if the user is logged in already
-    return render_template('home.html', firstname=firstname)
 
 # Route for movie searching (this is a route only as we will be showing the content in the home page)
 
 
 @views.route('/search', methods=["POST", "GET"])
 def search():
+
     # db connection
     conn = db_conn()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -74,14 +76,14 @@ def favorites():
                                 ORDER BY f.time""", (session['userid'],))
 
         favorites = cur.fetchall()
+        conn.close()
+        cur.close()
+        return render_template('favorites.html', favorites=favorites)
 
     else:
         return redirect(url_for('auth.login'))
 
-    conn.close()
-    cur.close()
-    return render_template('favorites.html', favorites=favorites)
-
+    
 
 @views.route('/buy_movie', methods=["POST"])
 def buy_movie():
@@ -114,7 +116,7 @@ def buy_movie():
                 # we check if the user has enough money
                 cur.execute("SELECT cash FROM Users WHERE userID = %s", (session['userid'],))
                 cash_result = cur.fetchone()
-                # checking if we got a resylt from the query
+                # checking if we got a result from the query
                 if cash_result:
                     cash = float(cash_result['cash'])
                     print(cash)
@@ -167,19 +169,25 @@ def my_movies():
                                 ORDER BY o.time""", (session['userid'],))
 
         paid_movies = cur.fetchall()
-
+        return render_template('my_movies.html', paid_movies=paid_movies)
+    
     else:
         return redirect(url_for('auth.login'))
-    return render_template('my_movies.html', paid_movies=paid_movies)
-
+    
 
 @views.route('/history')
 def history():
     if "userid" in session:
-        firstname = session['firstname']
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        cur.execute("SELECT * FROM Transactions WHERE userID = %s ORDER BY transaction_time DESC", (session['userid'],))
+        transactions = cur.fetchall()
+        conn.close()
+        cur.close()
+        return render_template('history.html', transactions=transactions)
     else:
         return redirect(url_for('auth.login'))
-    return render_template('history.html')
 
 
 @views.route('/details/<int:movieID>', methods=['GET'])
@@ -201,49 +209,58 @@ def details(movieID):
                     WHERE actors.actorid = works.actorid
                     AND movieID = %s""", (movieID,))
         actors = cur.fetchall()
+        cur.close()
+        conn.close()
+        return render_template('details.html', movie=movie, directors=directors, actors=actors)
 
     else:
         return redirect(url_for('auth.login'))
 
-    cur.close()
-    conn.close()
-    return render_template('details.html', movie=movie, directors=directors, actors=actors)
+    
 
 
 @views.route('/add_to_favorites', methods=['POST'])
 def add_to_favorites():
-    userId = session['userid']
-    movieId = request.form.get('movieid')
+    if "userid" in session:
+        userId = session['userid']
+        movieId = request.form.get('movieid')
 
-    conn = db_conn()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    cur.execute(
-        """INSERT INTO favorites (userid, movieid) VALUES (%s, %s)""", (userId, movieId))
-    conn.commit()
-    message = 'Movie added to favorites!'
-    cur.close()
-    conn.close()
+        cur.execute(
+            """INSERT INTO favorites (userid, movieid) VALUES (%s, %s)""", (userId, movieId))
+        conn.commit()
+        message = 'Movie added to favorites!'
+        cur.close()
+        conn.close()
 
-    return jsonify({'message': message})
+        return jsonify({'message': message})
+    
+    else:
+        return redirect(url_for('auth.login'))
 
 
 @views.route('/remove_favorite', methods=["POST"])
 def remove_favorite():
-    userId = session['userid']
-    movieId = request.form.get('favorite_title')
+    if "userid" in session:
+        userId = session['userid']
+        movieId = request.form.get('favorite_title')
 
-    conn = db_conn()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    cur.execute(
-        """DELETE FROM favorites WHERE movieid IN (SElECT movieid FROM movies m WHERE m.title = %s) AND userid = %s""", (movieId, userId,))
-    conn.commit()
-    message = 'Movie removed from favorites!'
-    cur.close()
-    conn.close()
+        cur.execute(
+            """DELETE FROM favorites WHERE movieid IN (SElECT movieid FROM movies m WHERE m.title = %s) AND userid = %s""", (movieId, userId,))
+        conn.commit()
+        message = 'Movie removed from favorites!'
+        cur.close()
+        conn.close()
 
-    return redirect(url_for('views.favorites'))
+        return redirect(url_for('views.favorites'))
+    
+    else:
+        return redirect(url_for('auth.login'))
 
 
 @views.route('/account', methods=["GET"])
@@ -255,13 +272,12 @@ def account():
         cur.execute("""SELECT * FROM Users
                         WHERE userID = %s """, (session['userid'],))
         results = cur.fetchone()
-
+        conn.close()
+        cur.close()
+        return render_template('account.html', results=results)
+    
     else:
         return redirect(url_for('auth.login'))
-
-    conn.close()
-    cur.close()
-    return render_template('account.html', results=results)
 
 @views.route('/add_cash', methods=['GET', 'POST'])
 def add_cash():
@@ -273,27 +289,59 @@ def add_cash():
                     WHERE userID = %s """, (session['userid'],))
         
         user = cur.fetchone()
+        conn.close()
+        cur.close()      
+        return render_template('add_cash.html', user=user )
 
     else:
         return redirect(url_for('auth.login'))
     
-    conn.close()
-    cur.close()
-    return render_template('add_cash.html', user=user )
 
 @views.route('/update_cash', methods=['GET','POST'])
 def update_cash():
-    # db connection
-    conn = db_conn()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    if request.method == "POST":
-        if 'new_balance' in request.form:
-            new_balance = request.form['new_balance']             
-            cur.execute("""UPDATE Users SET cash = %s
-                    WHERE userID = %s """, (new_balance, session['userid']))
-            conn.commit()
-    conn.close()
-    cur.close()
-    return redirect(url_for('views.account'))
+    if "userid" in session:
 
+        try:
+            # db connection
+            conn = db_conn()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            
+            if 'amount' in request.form:
+                amount = float(request.form['amount'])
+                               
+            else:
+                message = "Internal error"
+                cur.close()
+                conn.close()
+                return jsonify({'message': message, 'status':'error'})    
+
+            cur.execute("""SELECT cash FROM Users WHERE userID = %s""", (session['userid'],))
+            old_balance = cur.fetchone()
+            cash = float(old_balance['cash'])
+
+            new_balance =  cash + amount
+            cur.execute("""UPDATE Users SET cash = %s WHERE userID = %s """, (new_balance, session['userid'],))
+            cur.execute("""INSERT INTO Transactions 
+                        (userID, transactionType, amount, balanceBefore, balanceAfter)
+                        VALUES (%s, %s, %s, %s, %s)
+                        """, (session['userid'], "Add cash", amount, cash, new_balance,))
+            conn.commit()
+            message = "Transaction successfully completed.\n To check your new balance go to 'Account'"
+            conn.close()
+            cur.close()
+            return jsonify({'message': message, 'status': 'success'})
+            
+
+        except Exception as e:
+            conn.rollback()
+            message = str(e)
+            print(message)
+            return jsonify({'message': message, 'status': 'error'})
+
+        finally:
+            cur.close()
+            conn.close()  
+
+    else:
+        return redirect(url_for('auth.login'))
 
