@@ -229,7 +229,7 @@ def add_to_favorites():
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute(
-            """INSERT INTO favorites (userid, movieid) VALUES (%s, %s)""", (userId, movieId))
+            "INSERT INTO favorites (userid, movieid) VALUES (%s, %s)", (userId, movieId))
         conn.commit()
         message = 'Movie added to favorites!'
         cur.close()

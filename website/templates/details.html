@@ -28,8 +28,8 @@
 
     </br>
     <tr>
-        <button type="submit" class="btn btn-primary" method="POST">Add to Favorites</button>
-        <button type="submit" class="btn btn-primary" method="POST">Buy</button>
+        <button type="submit" class="btn btn-primary" onclick="addToFavorites('{{movie.movieid}}')">Add to Favorites</button>
+        <button type="submit" class="btn btn-primary" onclick="buyMovie('{{movie.movieid}}', '{{movie.title}}', '{{movie.type}}', '{{movie.price}}')">Buy</button>
     </tr>
     
 {% endblock %}

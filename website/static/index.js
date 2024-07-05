@@ -94,7 +94,7 @@ $(document).ready(function() {
     // function to add a movie to favorites
     window.addToFavorites = function(movieid) {
     $.ajax({
-      url: "add_to_favorites",
+      url: "/add_to_favorites",
       method: "POST",
       data: { movieid: movieid },
       success: function (data) {
