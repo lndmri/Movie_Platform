@@ -39,9 +39,6 @@ def login():
         if "userid" in session:
             return redirect(url_for('views.home'))
         return render_template("login.html", isLogin=True)
-    
-    return render_template("login.html", isLogin=True)
-
 
 
 @auth.route('/details/logout')

@@ -23,45 +23,47 @@ def home():
 
 # Route for movie searching (this is a route only as we will be showing the content in the home page)
 
-
 @views.route('/search', methods=["POST", "GET"])
 def search():
+    if "userid" in session:
+        # db connection
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    # db connection
-    conn = db_conn()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # LOGIC: the logic followed were is that the /search route is invoked as POST request (done by AJAX) then we
+        # do search. In the AJAX request we
 
-    # LOGIC: the logic followed were is that the /search route is invoked as POST request (done by AJAX) then we
-    # do search. In the AJAX request we
+        if request.method == "POST":
+            if 'query' in request.form:
+                search_word = request.form['query']
+                print(search_word)
+                if search_word == '':
+                    cur.execute("SELECT * FROM Movies ORDER BY Score")
+                    results = cur.fetchall()
+                else:
+                    cur.execute("""
+                        SELECT m.* FROM Movies m
+                        WHERE m.title ILIKE %s
+                        OR m.movieID IN 
+                        (SELECT movieID FROM Works w, Actors a 
+                        WHERE w.actorID = a.actorID AND a.name ILIKE %s)
+                        OR m.movieID IN 
+                        (SELECT movieID FROM Directs d, Directors di
+                        WHERE d.dirID = di.dirID AND di.name ILIKE %s)
+                        ORDER BY m.score DESC
+                        """, ('%' + search_word + '%', '%' + search_word + '%', '%' + search_word + '%',))
 
-    if request.method == "POST":
-        if 'query' in request.form:
-            search_word = request.form['query']
-            print(search_word)
-            if search_word == '':
-                cur.execute("SELECT * FROM Movies ORDER BY Score")
-                results = cur.fetchall()
-            else:
-                cur.execute("""
-                    SELECT m.* FROM Movies m
-                    WHERE m.title ILIKE %s
-                    OR m.movieID IN 
-                    (SELECT movieID FROM Works w, Actors a 
-                    WHERE w.actorID = a.actorID AND a.name ILIKE %s)
-                    OR m.movieID IN 
-                    (SELECT movieID FROM Directs d, Directors di
-                    WHERE d.dirID = di.dirID AND di.name ILIKE %s)
-                    ORDER BY m.score DESC
-                    """, ('%' + search_word + '%', '%' + search_word + '%', '%' + search_word + '%',))
+                    numrows = int(cur.rowcount)
+                    results = cur.fetchall()
+                    print(results)
 
-                numrows = int(cur.rowcount)
-                results = cur.fetchall()
-                print(results)
+                conn.close()
+                cur.close()
 
-            conn.close()
-            cur.close()
+        return jsonify({'htmlresponse': render_template('response.html', results=results, numrows=numrows)})
 
-    return jsonify({'htmlresponse': render_template('response.html', results=results, numrows=numrows)})
+    else:
+        return redirect(url_for('auth.login'))
 
 
 @views.route('/favorites', methods=["GET"])
@@ -82,7 +84,6 @@ def favorites():
 
     else:
         return redirect(url_for('auth.login'))
-
     
 
 @views.route('/buy_movie', methods=["POST"])
@@ -156,7 +157,6 @@ def buy_movie():
         return redirect(url_for('auth.login'))
     
 
-   
 @views.route('/my-movies', methods=["GET"])
 def my_movies():
     if "userid" in session:
@@ -216,8 +216,6 @@ def details(movieID):
     else:
         return redirect(url_for('auth.login'))
 
-    
-
 
 @views.route('/add_to_favorites', methods=['POST'])
 def add_to_favorites():
@@ -228,17 +226,24 @@ def add_to_favorites():
         conn = db_conn()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        cur.execute(
-            "INSERT INTO favorites (userid, movieid) VALUES (%s, %s)", (userId, movieId))
-        conn.commit()
-        message = 'Movie added to favorites!'
-        cur.close()
-        conn.close()
+        cur.execute("SELECT * FROM Favorites WHERE userID = %s AND movieID = %s", (session['userid'], movieId))
+        if cur.rowcount > 0:
+            message = "You have already added this movie to Favorites"   
+            cur.close()
+            conn.close()
+            return jsonify({'message': message, 'status': 'error'})  
 
-        return jsonify({'message': message})
+        else: 
+            cur.execute(
+                "INSERT INTO favorites (userid, movieid) VALUES (%s, %s)", (userId, movieId))
+            conn.commit()
+            message = 'Movie added to Favorites!'
+            cur.close()
+            conn.close()
+            return jsonify({'message': message})
     
     else:
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.login'))  
 
 
 @views.route('/remove_favorite', methods=["POST"])
