@@ -26,6 +26,7 @@ def login():
                 session.permanent = True
                 session['userid'] = account['userid']
                 session['firstname'] = account['firstname']
+                session['isadmin'] = account['isadmin']
                 flash('Logged in successfully', category='success')
                 return redirect(url_for('views.home'))
             else:

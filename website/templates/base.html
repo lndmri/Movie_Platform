@@ -44,6 +44,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home</a>
                 </li>
+                {% if not session['isadmin'] %}
                 <li class="nav-item">
                     <a class="nav-link" href="/favorites">Favorites</a>
                 </li>
@@ -56,6 +57,12 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/account">Account</a>
                 </li>
+                {% endif %}
+                {% if session['isadmin'] %}
+                <li class="nav-item">
+                  <a class="nav-link" href="/add-movie">Add Movie</a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="logout">Logout</a>
                 </li>
@@ -65,6 +72,9 @@
         </div>
       </nav>
 
+    <!-- <script type="text/javascript">
+        alert("{{session['isadmin']}}");
+    </script> -->
     <!-- MESSAGE FLASHING -->
     <!-- MESSAGE FLASHING -->
     {% with messages = get_flashed_messages(with_categories=true) %}
