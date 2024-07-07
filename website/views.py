@@ -349,4 +349,15 @@ def update_cash():
 
     else:
         return redirect(url_for('auth.login'))
+    
+@views.route('/add-movie', methods=['GET', 'POST'])
+def add_movie():
+    if request.form == 'POST':
+        pass
+    else:
+        ratings = ["TV-Y","TV-Y7-FV","TV-G","TV-14","TV-MA","TV-Y7","G","NC-17","PG","TV-PG","PG-13","R","A","UR","NR"]
+        return render_template("add_movie.html", ratings=ratings)
+        
+
+
 
