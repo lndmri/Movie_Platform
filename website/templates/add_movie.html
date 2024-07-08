@@ -9,24 +9,27 @@
               <div class="col">
                 <div class="form-group mb-3">
                     <label for="title" class="form-label">Movie Title</label>
-                    <input type="title" class="form-control" id="title" name="title" placeholder="Enter movie title" required/> 
+                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter movie title" required/> 
                 </div>
                 <div class="form-group mb-3">
                     <label class="form-label">Select a type:</label>
+                    <br>
                     <div class="form-check-inline">
                         <input type="radio" class="form-check-input" id="type_movie" name="type" value="Movie" checked/> 
                         <label class="form-check-label" for="type_movie">Movie</label>
                     </div>
                     <div class="form-check-inline">
                         <input type="radio" class="form-check-input" id="type_show" name="type" value="TV Show"/> 
-                        <label class="form-check-label" for="type_show">Show</label>
+                        <label class="form-check-label" for="type_show">TV Show</label>
                     </div>
                 </div>
                 <div class="form-group mb-3">
                     <label for="duration" class="form-label">Duration</label>
-                    <input type="number" class="form-control" id="duration" name="duration" placeholder="Enter duration" required/> 
+                    <input type="number" class="form-control" id="duration" name="duration" placeholder="Enter duration" required min="1"/> 
                     <div><p><em>Enter duration in minutes if it is a movie or enter it as seasons if it is a TV Show</em></p></div>
                 </div>
+              </div>
+              <div class="col">
                 <div class="form-group mb-3">
                     <label for="release_year" class="form-label">Release year</label>
                     <input type="number" class="form-control" id="release_year" name="release_year" placeholder="Enter release year" required/> 
@@ -40,11 +43,86 @@
                         {% endfor %}
                       </select>
                 </div>
+                <div class="form-group mb-3">
+                    <label for="score" class="form-label">Score</label>
+                    <input type="number" class="form-control" id="score" name="score" placeholder="Enter score" required min="0" max="10" step="0.1" pattern="^\d(\.\d)?$|^10(\.0)?$"/>                    
+                </div>
               </div>
-              <div class="col">
-                Column
-              </div> 
             </div>
-          </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <label for="genres" class="form-label">Genres</label>
+                        <div id="genres-container">
+                            <input type="text" class="form-control mb-2" name="genres" placeholder="Enter genre" required/>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="addGenre()">Add another genre</button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <label for="actors" class="form-label">Actors</label>
+                        <div id="actors-container">
+                            <input type="text" class="form-control mb-2" name="actors" placeholder="Enter actor" required/>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="addActor()">Add another actor</button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <label for="directors" class="form-label">Directors</label>
+                        <div id="directors-container">
+                            <input type="text" class="form-control mb-2" name="directors" placeholder="Enter director" required/>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="addDirector()">Add another director</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <button type="submit" class="btn btn-primary px-5 align-center">Submit</button>
+                </div>
+            </div>
+        </div>
     </form>
+
+
+    <script>
+        function addGenre() {
+            const container = document.getElementById('genres-container');
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group mb-2';
+            inputGroup.innerHTML = `
+                <input type="text" class="form-control" name="genres" placeholder="Enter genre" required/>
+                <button type="button" class="btn btn-danger" onclick="removeInput(this)">Remove</button>
+            `;
+            container.appendChild(inputGroup);
+        }
+
+        function addActor() {
+            const container = document.getElementById('actors-container');
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group mb-2';
+            inputGroup.innerHTML = `
+                <input type="text" class="form-control" name="actors" placeholder="Enter actor" required/>
+                <button type="button" class="btn btn-danger" onclick="removeInput(this)">Remove</button>
+            `;
+            container.appendChild(inputGroup);
+        }
+
+        function addDirector() {
+            const container = document.getElementById('directors-container');
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group mb-2';
+            inputGroup.innerHTML = `
+                <input type="text" class="form-control" name="directors" placeholder="Enter director" required/>
+                <button type="button" class="btn btn-danger" onclick="removeInput(this)">Remove</button>
+            `;
+            container.appendChild(inputGroup);
+        }
+
+        function removeInput(button) {
+            button.parentElement.remove();
+        }
+    </script>
 {% endblock %}
