@@ -11,16 +11,28 @@
                     <label for="title" class="form-label">Movie Title</label>
                     <input type="text" class="form-control" id="title" name="title" placeholder="Enter movie title" required/> 
                 </div>
-                <div class="form-group mb-3">
-                    <label class="form-label">Select a type:</label>
-                    <br>
-                    <div class="form-check-inline">
-                        <input type="radio" class="form-check-input" id="type_movie" name="type" value="Movie" checked/> 
-                        <label class="form-check-label" for="type_movie">Movie</label>
-                    </div>
-                    <div class="form-check-inline">
-                        <input type="radio" class="form-check-input" id="type_show" name="type" value="TV Show"/> 
-                        <label class="form-check-label" for="type_show">TV Show</label>
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Select a type:</label>
+                                <br>
+                                <div class="form-check-inline">
+                                    <input type="radio" class="form-check-input" id="type_movie" name="type" value="Movie" checked/> 
+                                    <label class="form-check-label" for="type_movie">Movie</label>
+                                </div>
+                                <div class="form-check-inline">
+                                    <input type="radio" class="form-check-input" id="type_show" name="type" value="TV Show"/> 
+                                    <label class="form-check-label" for="type_show">TV Show</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group mb-3">
+                                <label for="price" class="form-label">Price</label>
+                                <input type="number" class="form-control" id="price" name="price" placeholder="Enter price in USD" required min="0"/>                    
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group mb-3">
@@ -36,7 +48,7 @@
                 </div>
                 <div class="form-group mb-3">
                     <label for="rating" class="form-label">Rating</label>
-                    <select class="form-select" name="rating" aria-label="Default select example">
+                    <select class="form-select" name="rating" aria-label="Select Rating">
                         <option value="" selected></option>
                         {% for rating in ratings%}
                             <option value="{{rating}}">{{rating}}</option>
@@ -75,6 +87,14 @@
                             <input type="text" class="form-control mb-2" name="directors" placeholder="Enter director" required/>
                         </div>
                         <button type="button" class="btn btn-secondary" onclick="addDirector()">Add another director</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <label for="description" class="form-label">Description/Sinopsis</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                     </div>
                 </div>
             </div>

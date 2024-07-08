@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session
 from flask_login import login_required, current_user
-from .helpers import db_conn
+from .helpers import db_conn, check_movie_exists, add_movie_to_db
 import psycopg2
 import psycopg2.extras
 import json
@@ -305,7 +305,6 @@ def add_cash():
 @views.route('/update_cash', methods=['GET','POST'])
 def update_cash():
     if "userid" in session:
-
         try:
             # db connection
             conn = db_conn()
@@ -350,13 +349,73 @@ def update_cash():
     else:
         return redirect(url_for('auth.login'))
     
+# admin functions and routes:
 @views.route('/add-movie', methods=['GET', 'POST'])
 def add_movie():
-    if request.form == 'POST':
-        pass
-    else:
+    if "userid" in session:
+
         ratings = ["TV-Y","TV-Y7-FV","TV-G","TV-14","TV-MA","TV-Y7","G","NC-17","PG","TV-PG","PG-13","R","A","UR","NR"]
-        return render_template("add_movie.html", ratings=ratings)
+
+        if request.method == 'POST':
+            title = request.form['title']
+            movie_type = request.form['type']
+            price = request.form['price']
+            duration = request.form['duration']
+            release_year = request.form['release_year']
+            rating = request.form['rating']
+            score = request.form['score']
+            genres = request.form.getlist('genres')
+            actors = request.form.getlist('actors')
+            directors = request.form.getlist('directors')
+            description = request.form['description']
+
+            print(title)
+            print(movie_type)
+            print(price)
+            print(duration)
+            print(release_year)
+            print(rating)
+            print(score)
+            print(genres)
+            print(actors)
+            print(directors)
+            print(description)
+
+        
+            try:                
+                # formatting duration of the movie/show
+                if movie_type == 'Movie':
+                    duration = str(duration) + " min"
+                elif movie_type == 'TV Show':
+                    if duration == 1:
+                        duration = str(duration) + " season"
+                    else:
+                        duration = str(duration) + " seasons"
+                else:
+                    flash("Error processing duration.", "error")
+                    return render_template("add_movie.html", ratings=ratings)
+                
+                # checking if the movie already exists in the DB
+                if check_movie_exists(title, type, release_year):
+                    flash("Movie already exists. If you need to change it please go to Home and update it", "error")
+                    return render_template("add_movie.html", ratings=ratings)
+                # if it is not in the DB we are going to add it to the DB
+                else:
+                    if add_movie_to_db(title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
+                        flash("Movie successfully added to the database", 'success')
+                        return render_template("add_movie.html", ratings=ratings)
+
+            except Exception as e:
+                flash("Error", "error")
+                print(e)   
+                return render_template("add_movie.html", ratings=ratings)
+            
+        
+        else:       
+            return render_template("add_movie.html", ratings=ratings)
+        
+    else:
+        return redirect(url_for('auth.login'))
         
 
 
