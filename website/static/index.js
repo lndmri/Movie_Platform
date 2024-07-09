@@ -131,4 +131,43 @@ $(document).ready(function() {
         
     }
 
+    // Functions for Adding movie:
+
+    window.addGenre = function() {
+        const container = document.getElementById('genres-container');
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group mb-2';
+        inputGroup.innerHTML = `
+            <input type="text" class="form-control" name="genres" placeholder="Enter genre" required/>
+            <button type="button" class="btn btn-danger" onclick="removeInput(this)">Remove</button>
+        `;
+        container.appendChild(inputGroup);
+    }
+
+    window.addActor = function() {
+        const container = document.getElementById('actors-container');
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group mb-2';
+        inputGroup.innerHTML = `
+            <input type="text" class="form-control" name="actors" placeholder="Enter actor" required/>
+            <button type="button" class="btn btn-danger" onclick="removeInput(this)">Remove</button>
+        `;
+        container.appendChild(inputGroup);
+    }
+
+    window.addDirector = function() {
+        const container = document.getElementById('directors-container');
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group mb-2';
+        inputGroup.innerHTML = `
+            <input type="text" class="form-control" name="directors" placeholder="Enter director" required/>
+            <button type="button" class="btn btn-danger" onclick="removeInput(this)">Remove</button>
+        `;
+        container.appendChild(inputGroup);
+    }
+
+    window.removeInput = function(button) {
+        button.parentElement.remove();
+    }
+
 });

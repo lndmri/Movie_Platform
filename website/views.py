@@ -381,7 +381,7 @@ def add_movie():
             print(directors)
             print(description)
 
-        
+
             try:                
                 # formatting duration of the movie/show
                 if movie_type == 'Movie':
@@ -404,6 +404,11 @@ def add_movie():
                     if add_movie_to_db(title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
                         flash("Movie successfully added to the database", 'success')
                         return render_template("add_movie.html", ratings=ratings)
+                    else: 
+                        flash("Error occurred while adding movie", 'error')
+                        return render_template("add_movie.html", ratings=ratings)
+                        
+
 
             except Exception as e:
                 flash("Error", "error")
