@@ -30,7 +30,7 @@
     <tr>
         
         {% if session['isadmin'] %}
-            <button class="btn btn-warning" onclick="update_movie('{{movie.movieid}}')">Update</button>
+            <button class="btn btn-warning" onclick="getUpdateForm('{{movie.movieid}}')">Update</button>
             <button class="btn btn-danger" onclick="remove_movie('{{movie.movieid}}')">Remove</button>
         {% else %}
             <button type="submit" class="btn btn-primary" onclick="addToFavorites('{{movie.movieid}}')">Add to Favorites</button>

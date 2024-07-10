@@ -170,4 +170,22 @@ $(document).ready(function() {
         button.parentElement.remove();
     }
 
+    window.getUpdateForm = function(movieID) {
+        window.location.href = "/update/" + movieID;
+    }
+
+    // window.getUpdateForm = function(movieID)
+    // {
+    //     $.ajax({
+    //         url: "/update",
+    //         method: "POST",
+    //         data: { movieid: movieid },
+    //         success: function (data) {
+    //           alert(data.message);
+    //         },
+    //         error: function (xhr, status, error) {
+    //           alert("Error: " + error);
+    //         },
+    //       });
+    // }
 });

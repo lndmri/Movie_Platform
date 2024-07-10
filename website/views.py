@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from .helpers import db_conn, check_movie_exists, add_movie_to_db
 import psycopg2
 import psycopg2.extras
+import os
+from werkzeug.utils import secure_filename
 import json
 
 
@@ -352,7 +354,7 @@ def update_cash():
 # admin functions and routes:
 @views.route('/add-movie', methods=['GET', 'POST'])
 def add_movie():
-    if "userid" in session:
+    if "userid" in session and session['isadmin']:
 
         ratings = ["TV-Y","TV-Y7-FV","TV-G","TV-14","TV-MA","TV-Y7","G","NC-17","PG","TV-PG","PG-13","R","A","UR","NR"]
 
@@ -421,6 +423,65 @@ def add_movie():
         
     else:
         return redirect(url_for('auth.login'))
+    
+
+@views.route('/update/<int:movieID>', methods=['GET'])
+def updateForm(movieID):
+    if "userid" in session and session['isadmin']:
+        # db connection
+        conn = db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        ratings = ["TV-Y","TV-Y7-FV","TV-G","TV-14","TV-MA","TV-Y7","G","NC-17","PG","TV-PG","PG-13","R","A","UR","NR"]
+
+        cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
+        movie = cur.fetchone()
+
+        cur.execute("""SELECT directors.name FROM Directors, Directs 
+                    WHERE directors.dirid = directs.dirid
+                    AND movieID = %s""", (movieID,))
+        directors = cur.fetchall()
+
+        cur.execute("""SELECT actors.name FROM Actors, Works 
+                    WHERE actors.actorid = works.actorid
+                    AND movieID = %s""", (movieID,))
+        actors = cur.fetchall()
+        cur.close()
+        conn.close()
+        return render_template('update_movie.html', movie=movie, directors=directors, actors=actors, ratings=ratings)
+    
+    else:
+        return redirect(url_for('auth.login'))
+
+
+# @views.route('/update-movie', methods=['GET', 'POST'])
+# def update_movie():
+#     if "userid" in session and session['isadmin']:
+#         if request.method == POST:
+#             # db connection
+#             conn = db_conn()
+#             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+#             cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
+#             movie = cur.fetchone()
+
+#             cur.execute("""SELECT directors.name FROM Directors, Directs 
+#                         WHERE directors.dirid = directs.dirid
+#                         AND movieID = %s""", (movieID,))
+#             directors = cur.fetchall()
+
+#             cur.execute("""SELECT actors.name FROM Actors, Works 
+#                         WHERE actors.actorid = works.actorid
+#                         AND movieID = %s""", (movieID,))
+#             actors = cur.fetchall()
+#             cur.close()
+#             conn.close()
+#         return render_template('update.html', movie=movie, directors=directors, actors=actors)
+#         else:
+            
+#         else:
+#         return redirect(url_for('auth.login'))
+
         
 
 
