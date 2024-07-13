@@ -453,6 +453,45 @@ def updateForm(movieID):
     else:
         return redirect(url_for('auth.login'))
 
+@views.route('/remove_movie', methods=["POST"])
+def remove_movie():
+
+    if "userid" in session:
+        try:
+            # db connection
+            conn = db_conn()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+            if 'movieID' in request.form:
+                movieID = request.form['movieID']
+            else:
+                message = "Internal error"
+                cur.close()
+                conn.close()
+                return jsonify({'message': message, 'status':'error'})
+            
+            # delete movie
+            cur.execute("DELETE FROM movies WHERE movieid = %s", (movieID,))
+            conn.commit()
+            message = 'Movie has been deleted!'
+            cur.close()
+            conn.close()
+            return jsonify({'message': message, 'status': 'success'})
+
+
+        except Exception as e:
+            conn.rollback()
+            message = str(e)
+            print(message)
+            return jsonify({'message': message, 'status': 'error'})
+        finally:
+            cur.close()
+            conn.close()    
+    else:
+        return redirect(url_for('auth.login'))
+    
+
+
 
 # @views.route('/update-movie', methods=['GET', 'POST'])
 # def update_movie():
