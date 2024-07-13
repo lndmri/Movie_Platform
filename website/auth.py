@@ -4,13 +4,13 @@ import psycopg2, psycopg2.extras
 import re, logging
 from flask_login import login_required, current_user, login_user, logout_user
 from datetime import timedelta
-from .helpers import db_conn
+from .helpers import db_conn_user, db_conn_admin
 
 auth = Blueprint('auth',__name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    conn = db_conn()
+    conn = db_conn_user()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
@@ -51,7 +51,7 @@ def logout():
 @auth.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
-    conn = db_conn()
+    conn = db_conn_user()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if request.method == 'POST':
@@ -85,7 +85,7 @@ def sign_up():
         elif re.search('[\+\.\\~`!@#:;"<,>/\$%\^&\*\(\)\{\}\[\]\?=_-]',password1) is None:
             flash('Password must contain a special character.', category='error')
         else:
-            conn = db_conn()
+            conn = db_conn_user()
             cur = conn.cursor()
             hashed_password = generate_password_hash(
                 password1, method='pbkdf2:sha256')

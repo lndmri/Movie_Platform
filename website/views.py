@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session
 from flask_login import login_required, current_user
-from .helpers import db_conn, check_movie_exists, add_movie_to_db
+from .helpers import db_conn_user, db_conn_admin, check_movie_exists, add_movie_to_db
 import psycopg2
 import psycopg2.extras
 import os
@@ -29,7 +29,7 @@ def home():
 def search():
     if "userid" in session:
         # db connection
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         # LOGIC: the logic followed were is that the /search route is invoked as POST request (done by AJAX) then we
@@ -71,7 +71,7 @@ def search():
 @views.route('/favorites', methods=["GET"])
 def favorites():
     if "userid" in session:
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("""SELECT m.* FROM Movies m, Favorites f
@@ -94,7 +94,7 @@ def buy_movie():
     if "userid" in session:
         try:
             # db connection
-            conn = db_conn()
+            conn = db_conn_user()
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
             if 'movieID' in request.form and 'title' in request.form and 'price' in request.form:
@@ -162,7 +162,7 @@ def buy_movie():
 @views.route('/my-movies', methods=["GET"])
 def my_movies():
     if "userid" in session:
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("""SELECT m.* FROM Movies m, Owns o
@@ -180,7 +180,7 @@ def my_movies():
 @views.route('/history')
 def history():
     if "userid" in session:
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("SELECT * FROM Transactions WHERE userID = %s ORDER BY transaction_time DESC", (session['userid'],))
@@ -196,7 +196,7 @@ def history():
 def details(movieID):
     if "userid" in session:
         # db connection
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
@@ -225,7 +225,7 @@ def add_to_favorites():
         userId = session['userid']
         movieId = request.form.get('movieid')
 
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("SELECT * FROM Favorites WHERE userID = %s AND movieID = %s", (session['userid'], movieId))
@@ -254,7 +254,7 @@ def remove_favorite():
         userId = session['userid']
         movieId = request.form.get('favorite_title')
 
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute(
@@ -273,7 +273,7 @@ def remove_favorite():
 @views.route('/account', methods=["GET"])
 def account():
     if "userid" in session:
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("""SELECT * FROM Users
@@ -289,7 +289,7 @@ def account():
 @views.route('/add_cash', methods=['GET', 'POST'])
 def add_cash():
     if "userid" in session:
-        conn = db_conn()
+        conn = db_conn_user()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
         cur.execute("""SELECT * FROM Users
@@ -309,7 +309,7 @@ def update_cash():
     if "userid" in session:
         try:
             # db connection
-            conn = db_conn()
+            conn = db_conn_user()
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             
             if 'amount' in request.form:
@@ -429,7 +429,7 @@ def add_movie():
 def updateForm(movieID):
     if "userid" in session and session['isadmin']:
         # db connection
-        conn = db_conn()
+        conn = db_conn_admin()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         ratings = ["TV-Y","TV-Y7-FV","TV-G","TV-14","TV-MA","TV-Y7","G","NC-17","PG","TV-PG","PG-13","R","A","UR","NR"]
@@ -459,7 +459,7 @@ def remove_movie():
     if "userid" in session:
         try:
             # db connection
-            conn = db_conn()
+            conn = db_conn_admin()
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
             if 'movieID' in request.form:

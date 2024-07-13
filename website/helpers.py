@@ -1,11 +1,21 @@
 import psycopg2
 
-#connection to DB
-def db_conn():
+#connection to DB for regular users
+def db_conn_user():
     DB_HOST = "localhost"
     DB_NAME = "Movies_DB"
-    DB_USER = "postgres"
-    DB_PASS = "database24"
+    DB_USER = "appuser"
+    DB_PASS = "Lamarca@2024"
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    return conn
+
+#connection to DB for admin user
+def db_conn_admin():
+    DB_HOST = "localhost"
+    DB_NAME = "Movies_DB"
+    DB_USER = "appadmin"
+    DB_PASS = "Unalocura@2024"
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     return conn
@@ -16,7 +26,7 @@ def check_movie_exists(title, type, release_year):
     value = False
     try:
         # db connection
-        conn = db_conn()
+        conn = db_conn_admin()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
         # checking if the movie already exists in the DB
@@ -39,7 +49,7 @@ def add_movie_to_db(title, movie_type, price, duration, release_year, rating, sc
 
     try:
         # db connection
-        conn = db_conn()
+        conn = db_conn_admin()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
         # Insert data into Movies table
