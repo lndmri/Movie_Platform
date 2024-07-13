@@ -99,7 +99,6 @@ $(document).ready(function() {
       data: { movieid: movieid },
       success: function (data) {
         alert(data.message);
-        window.location.href = "/home";
       },
       error: function (xhr, status, error) {
         alert("Error: " + error);
@@ -191,9 +190,8 @@ $(document).ready(function() {
     // }
 
     // function to delete movie from DB
-    window.remove_movie = function(movieID, title) {
-
-        let userConfirmation = confirm(`Are you sure you want to delete this movie "${title}"?\n`);
+    window.remove_movie = function(movieID) {
+        let userConfirmation = confirm(`Are you sure you want to delete this movie?\n`);
 
         if (userConfirmation)
         {
@@ -204,6 +202,8 @@ $(document).ready(function() {
                 success: function(data) 
                 {
                     alert(data.message)
+                    window.location.href = "/";
+                    //window.history.go(-1);
                 },
                 error: function(data)
                 {

@@ -477,8 +477,7 @@ def remove_movie():
             cur.close()
             conn.close()
             return jsonify({'message': message, 'status': 'success'})
-
-
+            
         except Exception as e:
             conn.rollback()
             message = str(e)
