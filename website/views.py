@@ -211,9 +211,15 @@ def details(movieID):
                     WHERE actors.actorid = works.actorid
                     AND movieID = %s""", (movieID,))
         actors = cur.fetchall()
+
+        cur.execute("""SELECT Genres.name FROM Genres, ListedIn 
+                    WHERE Genres.genreID = ListedIn.genreID
+                    AND movieID = %s""", (movieID,))
+        genres = cur.fetchall()
+
         cur.close()
         conn.close()
-        return render_template('details.html', movie=movie, directors=directors, actors=actors)
+        return render_template('details.html', movie=movie, directors=directors, actors=actors, genres=genres)
 
     else:
         return redirect(url_for('auth.login'))
@@ -397,8 +403,6 @@ def add_movie():
                     
                     return render_template("add_movie.html", ratings=ratings)
                         
-
-
             except Exception as e:
                 flash("Error", "error")
                 print(e)   

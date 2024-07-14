@@ -75,28 +75,28 @@ def add_movie_to_db(title, movie_type, price, duration, release_year, rating, sc
                 RETURNING genreID;
             """, (genre,))
                 
-        genre_result = cur.fetchone()
-        print(genre_result)
-
-        # getting the genre_id
-        # if the genre comes from the previous query
-        if genre_result:
-            genre_id = genre_result[0]
-        else:
-        # if the genre was ON CONFLICT
-            cur.execute("SELECT genreID FROM Genres WHERE name = %s",(genre,))
             genre_result = cur.fetchone()
-            print("QUERY SELECT RESULT:" + str(genre_result))
+            print(genre_result)
+
+            # getting the genre_id
+            # if the genre comes from the previous query
             if genre_result:
-                    genre_id = genre_result[0]
-                    
-        #  Inserting the genre_id with its respective movie_id if the combination does not exist in the ListedIn table 
-        if genre_id and movie_id:
-            cur.execute("""
-                INSERT INTO ListedIn (movieID, genreID)
-                VALUES (%s, %s)
-                ON CONFLICT ON CONSTRAINT listedInPK DO NOTHING;
-            """, (movie_id, genre_id))
+                genre_id = genre_result[0]
+            else:
+            # if the genre was ON CONFLICT
+                cur.execute("SELECT genreID FROM Genres WHERE name = %s",(genre,))
+                genre_result = cur.fetchone()
+                print("QUERY SELECT RESULT:" + str(genre_result))
+                if genre_result:
+                        genre_id = genre_result[0]
+                        
+            #  Inserting the genre_id with its respective movie_id if the combination does not exist in the ListedIn table 
+            if genre_id and movie_id:
+                cur.execute("""
+                    INSERT INTO ListedIn (movieID, genreID)
+                    VALUES (%s, %s)
+                    ON CONFLICT ON CONSTRAINT listedInPK DO NOTHING;
+                """, (movie_id, genre_id))
 
         # Insert data into Actors and Works tables
         for actor in actors:
