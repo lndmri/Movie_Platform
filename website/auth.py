@@ -93,6 +93,15 @@ def sign_up():
             cur.execute('''INSERT INTO users (email, firstname, lastname, password_hash) VALUES (%s, %s, %s, %s)''',
                         (email, firstName, lastName, hashed_password))
             conn.commit()
+
+            cur.execute('SELECT * FROM users WHERE email = %s', (email,))
+            new_userID = cur.fetchone()
+            user_id = new_userID[0]
+
+            cur.execute("""INSERT INTO Transactions (userID, transactionType, amount, balanceBefore, balanceAfter)
+                        VALUES (%s, %s, %s, %s, %s)""", (user_id, "Cash Bonus", 100, 0, 100,))
+            conn.commit()
+
             cur.close()
             conn.close()
             flash('Account created!', category='success')
