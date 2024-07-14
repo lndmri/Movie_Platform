@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session
 from flask_login import login_required, current_user
-from .helpers import db_conn_user, db_conn_admin, check_movie_exists, add_movie_to_db
+from .helpers import db_conn_user, db_conn_admin, check_movie_exists, add_movie_to_db, upadate_movie_in_db
 import psycopg2
 import psycopg2.extras
 import os
@@ -371,19 +371,6 @@ def add_movie():
             directors = request.form.getlist('directors')
             description = request.form['description']
 
-            print(title)
-            print(movie_type)
-            print(price)
-            print(duration)
-            print(release_year)
-            print(rating)
-            print(score)
-            print(genres)
-            print(actors)
-            print(directors)
-            print(description)
-
-
             try:                
                 # formatting duration of the movie/show
                 if movie_type == 'Movie':
@@ -405,10 +392,10 @@ def add_movie():
                 else:
                     if add_movie_to_db(title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
                         flash("Movie successfully added to the database", 'success')
-                        return render_template("add_movie.html", ratings=ratings)
                     else: 
                         flash("Error occurred while adding movie", 'error')
-                        return render_template("add_movie.html", ratings=ratings)
+                    
+                    return render_template("add_movie.html", ratings=ratings)
                         
 
 
@@ -425,38 +412,10 @@ def add_movie():
         return redirect(url_for('auth.login'))
     
 
-@views.route('/update/<int:movieID>', methods=['GET'])
-def updateForm(movieID):
-    if "userid" in session and session['isadmin']:
-        # db connection
-        conn = db_conn_admin()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-        ratings = ["TV-Y","TV-Y7-FV","TV-G","TV-14","TV-MA","TV-Y7","G","NC-17","PG","TV-PG","PG-13","R","A","UR","NR"]
-
-        cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
-        movie = cur.fetchone()
-
-        cur.execute("""SELECT directors.name FROM Directors, Directs 
-                    WHERE directors.dirid = directs.dirid
-                    AND movieID = %s""", (movieID,))
-        directors = cur.fetchall()
-
-        cur.execute("""SELECT actors.name FROM Actors, Works 
-                    WHERE actors.actorid = works.actorid
-                    AND movieID = %s""", (movieID,))
-        actors = cur.fetchall()
-        cur.close()
-        conn.close()
-        return render_template('update_movie.html', movie=movie, directors=directors, actors=actors, ratings=ratings)
-    
-    else:
-        return redirect(url_for('auth.login'))
-
 @views.route('/remove_movie', methods=["POST"])
 def remove_movie():
 
-    if "userid" in session:
+    if "userid" in session and "isadmin" in session:
         try:
             # db connection
             conn = db_conn_admin()
@@ -491,36 +450,76 @@ def remove_movie():
     
 
 
+@views.route('/update/<int:movieID>', methods=['GET', 'POST'])
+def update_movie(movieID):
+    if "userid" in session and "isadmin" in session:
 
-# @views.route('/update-movie', methods=['GET', 'POST'])
-# def update_movie():
-#     if "userid" in session and session['isadmin']:
-#         if request.method == POST:
-#             # db connection
-#             conn = db_conn()
-#             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if request.method == 'POST':
+            title = request.form['title']
+            movie_type = request.form['type']
+            price = request.form['price']
+            duration = request.form['duration']
+            release_year = request.form['release_year']
+            rating = request.form['rating']
+            score = request.form['score']
+            genres = request.form.getlist('genres')
+            actors = request.form.getlist('actors')
+            directors = request.form.getlist('directors')
+            description = request.form['description']
 
-#             cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
-#             movie = cur.fetchone()
+            try:
+                if upadate_movie_in_db(movieID, title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
+                    flash("Movie successfully updated", 'success')
+                else:
+                    flash("Error while updating the movie. Please contact Tier 2 administrator", 'error')
 
-#             cur.execute("""SELECT directors.name FROM Directors, Directs 
-#                         WHERE directors.dirid = directs.dirid
-#                         AND movieID = %s""", (movieID,))
-#             directors = cur.fetchall()
+            except Exception as e:
+                flash(f"Error: {str(e)}", 'error')
+          
+            return redirect(url_for('views.update_movie', movieID=movieID))
 
-#             cur.execute("""SELECT actors.name FROM Actors, Works 
-#                         WHERE actors.actorid = works.actorid
-#                         AND movieID = %s""", (movieID,))
-#             actors = cur.fetchall()
-#             cur.close()
-#             conn.close()
-#         return render_template('update.html', movie=movie, directors=directors, actors=actors)
-#         else:
-            
-#         else:
-#         return redirect(url_for('auth.login'))
+        # if the request is of type GET
+        else:
+            conn = db_conn_admin()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            # Fetch current movie data
+            cur.execute('SELECT * FROM Movies WHERE movieID = %s', (movieID,))
+            movie = cur.fetchone()
+            print(movie)
 
-        
+            cur.execute("""SELECT name FROM ListedIn l, Genres g WHERE l.movieID = %s AND l.genreID = g.genreID""", (movieID,))
+            genres_result = cur.fetchall()
+            genres = []
+            if genres_result:
+                genres = [row['name'] for row in genres_result]
+            print(f'Genres {genres}')
+
+
+            cur.execute("""SELECT a.name FROM Works w, Actors a WHERE w.movieID = %s AND w.actorID = a.actorID""", (movieID,))
+            actors_result = cur.fetchall()
+            actors = []
+            if actors_result:
+                actors = [row['name'] for row in actors_result]
+
+
+            cur.execute("""SELECT name FROM Directs d, Directors dir WHERE d.movieID = %s AND dir.dirID = d.dirID""", (movieID,))
+            directors_result = cur.fetchall()
+            directors = []
+            if directors_result:
+                directors = [row['name'] for row in directors_result ]
+
+            print(f'Directors {directors}')
+
+            cur.close()
+            conn.close()
+
+            ratings = ["TV-Y", "TV-Y7-FV", "TV-G", "TV-14", "TV-MA", "TV-Y7", "G", "NC-17", "PG", "TV-PG", "PG-13", "R", "A", "UR", "NR"]
+
+            return render_template('update_movie.html', movie=movie, genres=genres, actors=actors, directors=directors, ratings=ratings)
+
+    else:
+        return redirect(url_for('auth.login'))
+
 
 
 

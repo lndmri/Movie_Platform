@@ -133,6 +133,7 @@ $(document).ready(function() {
 
     // Functions for Adding movie:
 
+    // function to add another entry for another genre
     window.addGenre = function() {
         const container = document.getElementById('genres-container');
         const inputGroup = document.createElement('div');
@@ -144,6 +145,7 @@ $(document).ready(function() {
         container.appendChild(inputGroup);
     }
 
+    // function to add another entry for another actor
     window.addActor = function() {
         const container = document.getElementById('actors-container');
         const inputGroup = document.createElement('div');
@@ -155,6 +157,7 @@ $(document).ready(function() {
         container.appendChild(inputGroup);
     }
 
+    // function to add another entry for another director
     window.addDirector = function() {
         const container = document.getElementById('directors-container');
         const inputGroup = document.createElement('div');
@@ -166,28 +169,20 @@ $(document).ready(function() {
         container.appendChild(inputGroup);
     }
 
+    // remove parent element function
     window.removeInput = function(button) {
         button.parentElement.remove();
     }
 
+    // function to get the udpates form
     window.getUpdateForm = function(movieID) {
         window.location.href = "/update/" + movieID;
     }
 
-    // window.getUpdateForm = function(movieID)
-    // {
-    //     $.ajax({
-    //         url: "/update",
-    //         method: "POST",
-    //         data: { movieid: movieid },
-    //         success: function (data) {
-    //           alert(data.message);
-    //         },
-    //         error: function (xhr, status, error) {
-    //           alert("Error: " + error);
-    //         },
-    //       });
-    // }
+    // function to confirm sending updates
+    window.confirmUpdate = function() {
+        return confirm('Are you sure you want to update the movie details?');
+    }
 
     // function to delete movie from DB
     window.remove_movie = function(movieID) {

@@ -181,3 +181,99 @@ def add_movie_to_db(title, movie_type, price, duration, release_year, rating, sc
         cur.close()
         conn.close() 
         return value 
+    
+
+
+def upadate_movie_in_db(movieID, title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
+
+    try:
+        # db connection
+        conn = db_conn_admin()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+         # Update movie details
+        cur.execute("""UPDATE Movies
+                        SET title = %s, type = %s, price = %s, duration = %s, released = %s, rating = %s, score = %s, description = %s
+                        WHERE movieID = %s""",
+                    (title, movie_type, price, duration, release_year, rating, score, description, movieID))
+
+        # Remove existing  genres, actors, and directors from ListedIn, Works and Directs Tables
+        if genres:
+            cur.execute("DELETE FROM Listedin WHERE movieID = %s", (movieID,))
+        if actors:
+            cur.execute("DELETE FROM Works WHERE movieID = %s", (movieID,))
+        if directors:
+            cur.execute("DELETE FROM Directs WHERE movieID = %s", (movieID,))
+
+        # Insert new genres, actors, and directors
+        # Working in Genre
+
+        if genres:
+            for genre in genres:
+                if genre == '':
+                    continue
+                # check if genre already exists in Genres table
+                cur.execute("SELECT genreID FROM Genres WHERE name = %s",(genre, ))
+                genre_result = cur.fetchone()
+                
+                # if the Genra is not listed in the Genres Tables we then insert it in the Genres table
+                if not genre_result:
+                    cur.execute("INSERT INTO Genres (name) VALUES (%s) RETURNING genreID", (genre, ))
+                    genre_result = cur.fetchone()
+                
+                #  finally we add an entry to the ListedIn table
+                if genre_result:
+                    genre_id = genre_result[0]
+                    cur.execute("INSERT INTO ListedIn (movieID, genreID) VALUES (%s, %s)", (movieID, genre_id))
+
+        if actors:    
+            for actor in actors:
+                if actor == '':
+                    continue
+                # check if actor already exists in actors table
+                cur.execute("SELECT actorID FROM Actors WHERE name = %s",(actor, ))
+                actor_result = cur.fetchone()
+                
+                # if the Actor is not listed in the Actors Tables we then insert it in the Actors table
+                if not actor_result:
+                    cur.execute("INSERT INTO Actors (name) VALUES (%s) RETURNING actorID", (actor, ))
+                    actor_result = cur.fetchone()
+                
+                #  finally we add an entry to the Works table
+                if actor_result:
+                    actorID = actor_result[0]
+                    cur.execute("INSERT INTO Works (movieID, actorID) VALUES (%s, %s)", (movieID, actorID))
+
+        for director in directors:
+            if director == '':
+                continue
+
+            # check if director already exists in Directors table
+            cur.execute("SELECT dirID FROM Directors WHERE name = %s",(director, ))
+            director_result = cur.fetchone()
+            
+            # if the director is not listed in the Directors Tables we then insert it in the Directors table
+            if not director_result:
+                cur.execute("INSERT INTO Directors (name) VALUES (%s) RETURNING dirID", (director, ))
+                director_result = cur.fetchone()
+            
+            #  finally we add an entry to the Directs table
+            if director_result:
+                directorID = director_result[0]
+                cur.execute("INSERT INTO Directs (movieID, dirID) VALUES (%s, %s)", (movieID, directorID))
+
+                conn.commit()
+        print("Movie Updated Successfully")
+        value = True
+            
+    except Exception as e:
+        conn.rollback()
+        message = str(e)
+        print(message)
+        value = False
+
+
+    finally:
+        cur.close()
+        conn.close() 
+        return value 
