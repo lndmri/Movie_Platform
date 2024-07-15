@@ -184,7 +184,7 @@ def add_movie_to_db(title, movie_type, price, duration, release_year, rating, sc
     
 
 
-def upadate_movie_in_db(movieID, title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
+def update_movie_in_db(movieID, title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
 
     try:
         # db connection

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session
 from flask_login import login_required, current_user
-from .helpers import db_conn_user, db_conn_admin, check_movie_exists, add_movie_to_db, upadate_movie_in_db
+from .helpers import db_conn_user, db_conn_admin, check_movie_exists, add_movie_to_db, update_movie_in_db
 import psycopg2
 import psycopg2.extras
 import os
@@ -472,7 +472,7 @@ def update_movie(movieID):
             description = request.form['description']
 
             try:
-                if upadate_movie_in_db(movieID, title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
+                if update_movie_in_db(movieID, title, movie_type, price, duration, release_year, rating, score, genres, actors, directors, description):
                     flash("Movie successfully updated", 'success')
                 else:
                     flash("Error while updating the movie. Please contact Tier 2 administrator", 'error')
