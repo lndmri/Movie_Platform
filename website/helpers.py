@@ -262,7 +262,7 @@ def upadate_movie_in_db(movieID, title, movie_type, price, duration, release_yea
                 directorID = director_result[0]
                 cur.execute("INSERT INTO Directs (movieID, dirID) VALUES (%s, %s)", (movieID, directorID))
 
-                conn.commit()
+        conn.commit()
         print("Movie Updated Successfully")
         value = True
             
