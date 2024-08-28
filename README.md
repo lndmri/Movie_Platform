@@ -20,5 +20,6 @@ This project was created to enhace our understanding of SQL and its integration 
 # Dataset
 The Web application contains close to 9000 movies/TV shows imported to our Database from Kaggle.com
 
-# Description: See PDF file with "Movie Platform Report" on the main features of the application
+# Description:
+See PDF file with "Movie Platform Report" on the main features of the application
 
